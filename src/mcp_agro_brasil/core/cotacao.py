@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from mcp_agro_brasil.providers import esalq, scot
+from mcp_agro_brasil.providers import esalq, noticias_agricolas, scot
 
 # ---------------------------------------------------------------------------
 # Cache em memória simples
@@ -143,6 +143,115 @@ def cotacao_boi_gordo(praca: str = "GO Goiânia") -> dict[str, Any]:
         )
 
     _ = usou_fallback  # informação está em resultado["fallback"]
+    _cache_set(chave, resultado)
+    return resultado
+
+
+# ---------------------------------------------------------------------------
+# Produtos disponíveis (expandir conforme novos providers)
+# ---------------------------------------------------------------------------
+
+PRODUTOS_DISPONIVEIS: list[str] = [
+    "boi_gordo",
+    "soja",
+    "milho",
+    "leite",
+]
+
+ESTADOS_LEITE: list[str] = [
+    "RS",
+    "SC",
+    "PR",
+    "SP",
+    "MG",
+    "GO",
+    "BA",
+    "RJ",
+    "ES",
+    "Brasil",
+]
+
+
+# ---------------------------------------------------------------------------
+# Grãos: Soja, Milho, Leite
+# ---------------------------------------------------------------------------
+
+
+def cotacao_soja() -> dict[str, Any]:
+    """Retorna o indicador CEPEA/ESALQ de soja - Porto de Paranaguá, com cache.
+
+    Returns:
+        Dicionário com: indicador, a_vista, unidade, moeda, fonte,
+        fonte_url, data_consulta, cache_hit.
+
+    Raises:
+        RuntimeError: Se o provider falhar.
+    """
+    chave = "graos:soja:cepea"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = noticias_agricolas.buscar_cotacao_soja()
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar cotação de soja: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    _cache_set(chave, resultado)
+    return resultado
+
+
+def cotacao_milho() -> dict[str, Any]:
+    """Retorna o indicador CEPEA/ESALQ de milho, com cache.
+
+    Returns:
+        Dicionário com: indicador, a_vista, unidade, moeda, fonte,
+        fonte_url, data_consulta, cache_hit.
+
+    Raises:
+        RuntimeError: Se o provider falhar.
+    """
+    chave = "graos:milho:cepea"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = noticias_agricolas.buscar_cotacao_milho()
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar cotação de milho: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    _cache_set(chave, resultado)
+    return resultado
+
+
+def cotacao_leite(estado: str = "Brasil") -> dict[str, Any]:
+    """Retorna preço ao produtor de leite CEPEA por estado, com cache.
+
+    Args:
+        estado: Sigla do estado (ex.: 'GO', 'MG', 'SP') ou 'Brasil'.
+                Padrão: 'Brasil'.
+
+    Returns:
+        Dicionário com: indicador, estado, a_vista, unidade, moeda, fonte,
+        fonte_url, data_consulta, cache_hit.
+
+    Raises:
+        RuntimeError: Se o provider falhar.
+    """
+    chave = f"graos:leite:{estado.lower().strip()}"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = noticias_agricolas.buscar_cotacao_leite(estado)
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar cotação de leite: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
     _cache_set(chave, resultado)
     return resultado
 

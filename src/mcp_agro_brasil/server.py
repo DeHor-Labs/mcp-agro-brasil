@@ -5,8 +5,12 @@ Registra tools no FastMCP e expõe via stdio (padrão) ou HTTP streamable.
 Tools expostas:
 - cotacao_boi_gordo     : cotação regional de boi gordo (Scot, fallback ESALQ)
 - indicador_esalq       : indicador nacional ESALQ/B3 de boi gordo
+- cotacao_soja          : indicador CEPEA/ESALQ de soja - Porto de Paranaguá
+- cotacao_milho         : indicador CEPEA/ESALQ de milho
+- cotacao_leite         : preço ao produtor CEPEA de leite por estado
 - converter             : conversões de unidades do agronegócio (peso e área)
 - listar_pracas         : praças disponíveis no provider Scot
+- listar_produtos       : produtos com cotação disponível
 - listar_unidades       : unidades suportadas pelo módulo de conversão
 """
 
@@ -18,14 +22,15 @@ from mcp_agro_brasil.core import conversao, cotacao
 
 app = fastmcp.FastMCP(
     name="MCP Agro Brasil",
-    version="0.1.0",
+    version="0.2.0",
     instructions=(
         "Ferramentas de dados do agronegócio brasileiro. "
         "Cotações de boi gordo via Scot Consultoria (regional) e ESALQ/B3 (nacional). "
+        "Cotações de grãos: soja e milho via indicadores CEPEA/ESALQ; leite ao produtor CEPEA por estado. "
         "Conversões de unidades: arroba, saca, hectare, alqueire e mais. "
         "AVISO: cotações são scrapeadas de fontes públicas e podem ter defasagem de "
         "minutos a horas em relação ao mercado em tempo real. "
-        "Roadmap: soja, milho, café, leite, câmbio, safra, notícias."
+        "Roadmap: câmbio, exportação, safra, notícias."
     ),
 )
 
@@ -63,6 +68,51 @@ def indicador_esalq() -> dict[str, object]:
         Dicionário com: indicador, a_vista (R$/@), unidade, moeda, fonte, data_consulta.
     """
     return cotacao.indicador_esalq()
+
+
+@app.tool()
+def cotacao_soja() -> dict[str, object]:
+    """Retorna o indicador CEPEA/ESALQ de soja - Porto de Paranaguá.
+
+    Referência nacional amplamente utilizada como benchmark de preço da soja.
+    Fonte: Notícias Agrícolas / CEPEA-ESALQ.
+
+    Returns:
+        Dicionário com: indicador, a_vista (R$/saca 60 kg), unidade, moeda,
+        fonte, data_consulta, cache_hit.
+    """
+    return cotacao.cotacao_soja()
+
+
+@app.tool()
+def cotacao_milho() -> dict[str, object]:
+    """Retorna o indicador CEPEA/ESALQ de milho.
+
+    Referência nacional de preço do milho.
+    Fonte: Notícias Agrícolas / CEPEA-ESALQ.
+
+    Returns:
+        Dicionário com: indicador, a_vista (R$/saca 60 kg), unidade, moeda,
+        fonte, data_consulta, cache_hit.
+    """
+    return cotacao.cotacao_milho()
+
+
+@app.tool()
+def cotacao_leite(estado: str = "Brasil") -> dict[str, object]:
+    """Retorna o preço ao produtor de leite (CEPEA) por estado.
+
+    Fonte: Notícias Agrícolas / CEPEA.
+    Estados disponíveis: RS, SC, PR, SP, MG, GO, BA, RJ, ES, Brasil (média nacional).
+
+    Args:
+        estado: Sigla do estado (ex.: 'GO', 'MG', 'SP') ou 'Brasil'. Padrão: 'Brasil'.
+
+    Returns:
+        Dicionário com: indicador, estado, a_vista (R$/litro), unidade, moeda,
+        fonte, data_consulta, cache_hit.
+    """
+    return cotacao.cotacao_leite(estado)
 
 
 @app.tool()
@@ -108,6 +158,23 @@ def listar_pracas() -> dict[str, object]:
         "nota": (
             "Para praças fora desta lista, o sistema usa fallback "
             "para o indicador nacional ESALQ/B3."
+        ),
+    }
+
+
+@app.tool()
+def listar_produtos() -> dict[str, object]:
+    """Lista todos os produtos com cotação disponível no MCP Agro Brasil.
+
+    Returns:
+        Dicionário com: produtos (lista), total, nota.
+    """
+    return {
+        "produtos": cotacao.PRODUTOS_DISPONIVEIS,
+        "total": len(cotacao.PRODUTOS_DISPONIVEIS),
+        "nota": (
+            "Para grãos use cotacao_soja, cotacao_milho ou cotacao_leite. "
+            "Para boi gordo use cotacao_boi_gordo ou indicador_esalq."
         ),
     }
 

@@ -36,8 +36,12 @@ Adicione ao seu `claude_desktop_config.json` (ou equivalente):
 |------|-----------|
 | `cotacao_boi_gordo` | Cotação regional de boi gordo (Scot Consultoria, fallback ESALQ) |
 | `indicador_esalq` | Indicador nacional ESALQ/B3 de boi gordo |
+| `cotacao_soja` | Indicador CEPEA/ESALQ de soja - Porto de Paranaguá (R$/saca) |
+| `cotacao_milho` | Indicador CEPEA/ESALQ de milho (R$/saca) |
+| `cotacao_leite` | Preço ao produtor CEPEA de leite por estado (R$/litro) |
 | `converter` | Converte entre unidades do agro (arroba, saca, ha, alqueire...) |
-| `listar_pracas` | Lista praças disponíveis no provider Scot |
+| `listar_pracas` | Lista praças disponíveis no provider Scot (boi gordo) |
+| `listar_produtos` | Lista todos os produtos com cotação disponível |
 | `listar_unidades` | Lista unidades suportadas pelo conversor |
 
 ## Exemplos de uso
@@ -47,9 +51,11 @@ Adicione ao seu `claude_desktop_config.json` (ou equivalente):
 Qual a cotação do boi gordo em Goiânia hoje?
 ```
 
-**Cotação em outra praça:**
+**Cotação de grãos:**
 ```
-Qual o preço do boi gordo em Araçatuba?
+Qual o preço da soja hoje?
+Qual a cotação do milho CEPEA agora?
+Quanto está o leite ao produtor em Goiás?
 ```
 
 **Indicador nacional:**
@@ -70,10 +76,15 @@ GO Goiânia, MS Campo Grande, MT Cuiabá, MG Belo Horizonte, SP Araçatuba,
 SP Barretos, SP Presidente Prudente, SP São José do Rio Preto, PR Cascavel,
 RS Porto Alegre, PA Redenção, BA Feira de Santana.
 
+## Praças de leite suportadas
+
+RS, SC, PR, SP, MG, GO, BA, RJ, ES e Brasil (média nacional).
+
 ## Fontes e atribuição
 
 - **Scot Consultoria** - cotações regionais de boi gordo: [scotconsultoria.com.br](https://www.scotconsultoria.com.br/cotacoes/boi-gordo/)
-- **ESALQ/B3 via Notícias Agrícolas** - indicador nacional: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/boi-gordo/boi-gordo-indicador-esalq-bmf)
+- **ESALQ/B3 via Notícias Agrícolas** - indicador boi gordo: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/boi-gordo/boi-gordo-indicador-esalq-bmf)
+- **CEPEA/ESALQ via Notícias Agrícolas** - soja, milho e leite: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/)
 
 Os dados são obtidos por scraping de páginas públicas. Podem ter defasagem de minutos a horas em relação ao mercado em tempo real. Não use para decisões financeiras sem confirmar nas fontes originais.
 
@@ -81,10 +92,10 @@ Os dados são obtidos por scraping de páginas públicas. Podem ter defasagem de
 
 - [x] Boi gordo - cotação regional (Scot) + indicador nacional (ESALQ/B3)
 - [x] Conversão de unidades (arroba, saca, hectare, alqueire...)
-- [ ] Soja - cotação por praça e CBOT
-- [ ] Milho - cotação regional e CBOT
+- [x] Soja - indicador CEPEA/ESALQ Porto de Paranaguá
+- [x] Milho - indicador CEPEA/ESALQ
+- [x] Leite - preço ao produtor CEPEA por estado
 - [ ] Café - indicador ESALQ e NY
-- [ ] Leite - indicador CEPEA
 - [ ] Câmbio USD/BRL (impacto nas commodities)
 - [ ] Exportações - dados MDIC
 - [ ] Safra - estimativas CONAB
