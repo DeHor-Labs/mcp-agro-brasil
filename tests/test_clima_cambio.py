@@ -106,9 +106,7 @@ class TestOpenMeteoPrevisao:
         mock_client.get.side_effect = fake_get
         monkeypatch.setattr(httpx, "Client", lambda **kw: mock_client)
 
-    def test_previsao_retorna_campos_obrigatorios(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_previsao_retorna_campos_obrigatorios(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         resultado = buscar_previsao("Goiânia", dias=5)
         assert resultado["fonte"] == "Open-Meteo"
@@ -122,9 +120,7 @@ class TestOpenMeteoPrevisao:
         resultado = buscar_previsao("Goiânia", dias=5)
         assert len(resultado["dias"]) == 5
 
-    def test_previsao_primeiro_dia_campos(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_previsao_primeiro_dia_campos(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         resultado = buscar_previsao("Goiânia", dias=5)
         dia = resultado["dias"][0]
@@ -134,17 +130,13 @@ class TestOpenMeteoPrevisao:
         assert dia["precipitacao_mm"] == pytest.approx(0.0)
         assert dia["prob_chuva_pct"] == 0
 
-    def test_dias_limite_superior_truncado_a_7(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_dias_limite_superior_truncado_a_7(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         # dias=10 deve ser truncado para 7 internamente
         resultado = buscar_previsao("Goiânia", dias=10)
         assert len(resultado["dias"]) <= 7
 
-    def test_dias_limite_inferior_minimo_1(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_dias_limite_inferior_minimo_1(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         resultado = buscar_previsao("Goiânia", dias=0)
         assert len(resultado["dias"]) >= 1
@@ -170,9 +162,7 @@ class TestBcbPtax:
 
         monkeypatch.setattr(httpx, "Client", lambda **kw: mock_client)
 
-    def test_ptax_retorna_campos_obrigatorios(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_ptax_retorna_campos_obrigatorios(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         resultado = buscar_ptax()
         assert resultado["moeda_origem"] == "USD"
@@ -189,16 +179,12 @@ class TestBcbPtax:
         assert resultado["compra"] == pytest.approx(5.1689)
         assert resultado["venda"] == pytest.approx(5.1695)
 
-    def test_ptax_venda_maior_ou_igual_compra(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_ptax_venda_maior_ou_igual_compra(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._patch_httpx(monkeypatch)
         resultado = buscar_ptax()
         assert resultado["venda"] >= resultado["compra"]
 
-    def test_ptax_sem_cotacao_levanta_runtimeerror(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_ptax_sem_cotacao_levanta_runtimeerror(self, monkeypatch: pytest.MonkeyPatch) -> None:
         import httpx
 
         mock_resp = MagicMock()

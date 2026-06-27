@@ -45,9 +45,7 @@ def _buscar_coordenadas(cidade: str) -> dict[str, float | str]:
 
     resultados = dados.get("results", [])
     if not resultados:
-        raise ValueError(
-            f"Cidade '{cidade}' não encontrada na API de geocoding Open-Meteo."
-        )
+        raise ValueError(f"Cidade '{cidade}' não encontrada na API de geocoding Open-Meteo.")
 
     primeiro = resultados[0]
     return {
