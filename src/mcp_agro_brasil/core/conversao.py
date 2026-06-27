@@ -108,10 +108,8 @@ def converter(valor: float, de: str, para: str) -> float:
             f"Unidade de destino desconhecida: '{para}'. "
             f"Pesos suportados: {UNIDADES_PESO}. Áreas: {UNIDADES_AREA}."
         )
-    if de_peso and para_area or de_area and para_peso:
-        raise ValueError(
-            f"Conversão cruzada não suportada: '{de}' (peso) <-> '{para}' (área)."
-        )
+    if (de_peso and para_area) or (de_area and para_peso):
+        raise ValueError(f"Conversão cruzada não suportada: '{de}' (peso) <-> '{para}' (área).")
 
     if de_peso:
         # Converte via kg como intermediário

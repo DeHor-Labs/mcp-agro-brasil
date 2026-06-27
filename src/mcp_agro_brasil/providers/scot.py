@@ -82,9 +82,7 @@ def buscar_cotacao_boi(praca: str = "GO Goiânia") -> dict[str, object]:
     Raises:
         httpx.HTTPError: Em caso de falha de rede ou HTTP não-200.
     """
-    with httpx.Client(
-        headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True
-    ) as client:
+    with httpx.Client(headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True) as client:
         resposta = client.get(_SCOT_URL)
         resposta.raise_for_status()
         html = resposta.text

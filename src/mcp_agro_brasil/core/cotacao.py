@@ -138,8 +138,7 @@ def cotacao_boi_gordo(praca: str = "GO Goiânia") -> dict[str, Any]:
 
     if resultado is None:
         raise RuntimeError(
-            f"Todos os providers falharam ao buscar cotação de boi gordo. "
-            f"Erros: {'; '.join(erros)}"
+            f"Todos os providers falharam ao buscar cotação de boi gordo. Erros: {'; '.join(erros)}"
         )
 
     _ = usou_fallback  # informação está em resultado["fallback"]

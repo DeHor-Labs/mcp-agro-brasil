@@ -76,7 +76,7 @@ class TestSojaBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
@@ -94,9 +94,7 @@ class TestSojaBusca:
         assert "CEPEA" in str(resultado["fonte"])
         assert "Soja" in str(resultado["indicador"])
 
-    def test_retorna_none_quando_sem_dados(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_retorna_none_quando_sem_dados(self, monkeypatch: pytest.MonkeyPatch) -> None:
         import httpx
 
         class MockResponse:
@@ -107,7 +105,7 @@ class TestSojaBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
@@ -149,7 +147,7 @@ class TestMilhoBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
@@ -207,7 +205,7 @@ class TestLeiteBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
@@ -236,7 +234,7 @@ class TestLeiteBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:

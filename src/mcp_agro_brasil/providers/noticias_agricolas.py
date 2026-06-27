@@ -97,9 +97,7 @@ def buscar_cotacao_soja() -> dict[str, object]:
     Raises:
         httpx.HTTPError: Em caso de falha de rede ou HTTP não-200.
     """
-    with httpx.Client(
-        headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True
-    ) as client:
+    with httpx.Client(headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True) as client:
         resposta = client.get(_URL_SOJA)
         resposta.raise_for_status()
         html = resposta.text
@@ -129,9 +127,7 @@ def buscar_cotacao_milho() -> dict[str, object]:
     Raises:
         httpx.HTTPError: Em caso de falha de rede ou HTTP não-200.
     """
-    with httpx.Client(
-        headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True
-    ) as client:
+    with httpx.Client(headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True) as client:
         resposta = client.get(_URL_MILHO)
         resposta.raise_for_status()
         html = resposta.text
@@ -165,9 +161,7 @@ def buscar_cotacao_leite(estado: str = "Brasil") -> dict[str, object]:
     Raises:
         httpx.HTTPError: Em caso de falha de rede ou HTTP não-200.
     """
-    with httpx.Client(
-        headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True
-    ) as client:
+    with httpx.Client(headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True) as client:
         resposta = client.get(_URL_LEITE)
         resposta.raise_for_status()
         html = resposta.text

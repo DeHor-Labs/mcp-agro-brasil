@@ -74,7 +74,7 @@ class TestScotBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
@@ -124,7 +124,7 @@ class TestEsalqBusca:
                 pass
 
         class MockClient:
-            def __enter__(self) -> "MockClient":
+            def __enter__(self) -> MockClient:
                 return self
 
             def __exit__(self, *args: object) -> None:
