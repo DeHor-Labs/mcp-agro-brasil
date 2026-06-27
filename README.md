@@ -1,120 +1,221 @@
 # mcp-agro-brasil
 
-MCP server de dados do agronegócio brasileiro para Claude e outros clientes MCP.
+MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, mais conversões de unidades.
 
-Terceiro da família [MCP Brasil](https://github.com/DeHor-Labs): após [mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil) e [mcp-juridico-brasil](https://github.com/DeHor-Labs/mcp-juridico-brasil).
+Parte da família [MCP Brasil](https://github.com/DeHor-Labs) junto com
+[mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil) e
+[mcp-juridico-brasil](https://github.com/DeHor-Labs/mcp-juridico-brasil).
 
-## Instalação
+[![CI](https://github.com/DeHor-Labs/mcp-agro-brasil/actions/workflows/ci.yml/badge.svg)](https://github.com/DeHor-Labs/mcp-agro-brasil/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/mcp-agro-brasil?color=2e7d32&label=PyPI)](https://pypi.org/project/mcp-agro-brasil/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-2e7d32)](https://www.python.org/)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-4caf50)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-compatível-7c3aed)](https://modelcontextprotocol.io)
+
+---
+
+## O que é
+
+`mcp-agro-brasil` conecta qualquer cliente MCP (Claude Desktop, Claude Code, outros) a indicadores
+do agronegócio brasileiro em tempo quase real:
+
+- **Boi gordo** - cotação regional por praça via Scot Consultoria e indicador nacional ESALQ/B3
+- **Soja** - indicador CEPEA/ESALQ Porto de Paranaguá (R$/saca 60 kg)
+- **Milho** - indicador CEPEA/ESALQ (R$/saca 60 kg)
+- **Leite** - preço ao produtor CEPEA por estado (R$/litro)
+- **Conversões** - arroba, saca, hectare, alqueire e outras unidades do agro
+
+Os dados são obtidos por scraping de páginas públicas com cache local, respeitando as fontes.
+
+---
+
+## Instalação rápida
+
+A forma mais simples, sem instalação permanente:
+
+```bash
+uvx mcp-agro-brasil
+```
+
+Ou instale com pip/uv:
 
 ```bash
 pip install mcp-agro-brasil
-```
-
-Ou com uv:
-
-```bash
+# ou
 uv add mcp-agro-brasil
 ```
 
+---
+
 ## Configuração MCP
 
-Adicione ao seu `claude_desktop_config.json` (ou equivalente):
+### Claude Desktop
+
+Adicione ao `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "agro-brasil": {
-      "command": "mcp-agro-brasil"
+      "command": "uvx",
+      "args": ["mcp-agro-brasil"]
     }
   }
 }
 ```
 
-## Tools disponíveis
+### Claude Code
 
-| Tool | Descrição |
-|------|-----------|
-| `cotacao_boi_gordo` | Cotação regional de boi gordo (Scot Consultoria, fallback ESALQ) |
-| `indicador_esalq` | Indicador nacional ESALQ/B3 de boi gordo |
-| `cotacao_soja` | Indicador CEPEA/ESALQ de soja - Porto de Paranaguá (R$/saca) |
-| `cotacao_milho` | Indicador CEPEA/ESALQ de milho (R$/saca) |
-| `cotacao_leite` | Preço ao produtor CEPEA de leite por estado (R$/litro) |
-| `converter` | Converte entre unidades do agro (arroba, saca, ha, alqueire...) |
-| `listar_pracas` | Lista praças disponíveis no provider Scot (boi gordo) |
-| `listar_produtos` | Lista todos os produtos com cotação disponível |
-| `listar_unidades` | Lista unidades suportadas pelo conversor |
-
-## Exemplos de uso
-
-**Cotação de boi gordo em Goiânia:**
-```
-Qual a cotação do boi gordo em Goiânia hoje?
+```bash
+claude mcp add agro-brasil -- uvx mcp-agro-brasil
 ```
 
-**Cotação de grãos:**
-```
-Qual o preço da soja hoje?
-Qual a cotação do milho CEPEA agora?
-Quanto está o leite ao produtor em Goiás?
+Ou adicione ao `.claude/settings.json` do projeto:
+
+```json
+{
+  "mcpServers": {
+    "agro-brasil": {
+      "command": "uvx",
+      "args": ["mcp-agro-brasil"]
+    }
+  }
+}
 ```
 
-**Indicador nacional:**
-```
-Qual o indicador ESALQ/B3 do boi gordo agora?
+---
+
+## Ferramentas disponíveis
+
+| Ferramenta | Descrição | Parâmetros |
+|------------|-----------|------------|
+| `cotacao_boi_gordo` | Cotação regional de boi gordo (Scot, fallback ESALQ) | `praca` (ex.: "GO Goiânia") |
+| `indicador_esalq` | Indicador nacional ESALQ/B3 de boi gordo | - |
+| `cotacao_soja` | Indicador CEPEA/ESALQ de soja - Porto de Paranaguá | - |
+| `cotacao_milho` | Indicador CEPEA/ESALQ de milho | - |
+| `cotacao_leite` | Preço ao produtor CEPEA de leite por estado | `estado` (ex.: "GO", "Brasil") |
+| `converter` | Converte entre unidades do agro (peso e área) | `valor`, `de_unidade`, `para_unidade` |
+| `listar_pracas` | Lista praças disponíveis no provider Scot | - |
+| `listar_produtos` | Lista todos os produtos com cotação disponível | - |
+| `listar_unidades` | Lista unidades suportadas pelo conversor | - |
+
+### Exemplos de retorno
+
+**`cotacao_boi_gordo("GO Goiânia")`**
+```json
+{
+  "praca": "GO Goiânia",
+  "a_vista": 312.50,
+  "trinta_dias": 315.00,
+  "unidade": "R$/@",
+  "moeda": "BRL",
+  "fonte": "Scot Consultoria",
+  "data_consulta": "2026-06-27T10:00:00",
+  "cache_hit": false
+}
 ```
 
-**Conversão de unidades:**
-```
-Quanto vale 50 arrobas em quilogramas?
-Converta 200 hectares para alqueires goianos.
-1 saca de soja quantos quilos tem?
+**`cotacao_soja()`**
+```json
+{
+  "indicador": "Soja CEPEA/ESALQ - Paranaguá",
+  "a_vista": 142.30,
+  "unidade": "R$/saca 60 kg",
+  "moeda": "BRL",
+  "fonte": "CEPEA/ESALQ via Notícias Agrícolas",
+  "data_consulta": "2026-06-27T10:00:00"
+}
 ```
 
-## Praças suportadas
+**`converter(50, "arroba", "kg")`**
+```json
+{
+  "valor_original": 50.0,
+  "de_unidade": "arroba",
+  "resultado": 735.0,
+  "para_unidade": "kg"
+}
+```
+
+---
+
+## Praças suportadas (boi gordo)
 
 GO Goiânia, MS Campo Grande, MT Cuiabá, MG Belo Horizonte, SP Araçatuba,
 SP Barretos, SP Presidente Prudente, SP São José do Rio Preto, PR Cascavel,
 RS Porto Alegre, PA Redenção, BA Feira de Santana.
 
-## Praças de leite suportadas
+Para praças fora desta lista, o sistema usa fallback para o indicador nacional ESALQ/B3.
+
+## Estados suportados (leite)
 
 RS, SC, PR, SP, MG, GO, BA, RJ, ES e Brasil (média nacional).
+
+---
 
 ## Fontes e atribuição
 
 - **Scot Consultoria** - cotações regionais de boi gordo: [scotconsultoria.com.br](https://www.scotconsultoria.com.br/cotacoes/boi-gordo/)
-- **ESALQ/B3 via Notícias Agrícolas** - indicador boi gordo: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/boi-gordo/boi-gordo-indicador-esalq-bmf)
+- **ESALQ/B3 via Notícias Agrícolas** - indicador nacional boi gordo: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/boi-gordo/boi-gordo-indicador-esalq-bmf)
 - **CEPEA/ESALQ via Notícias Agrícolas** - soja, milho e leite: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/)
 
-Os dados são obtidos por scraping de páginas públicas. Podem ter defasagem de minutos a horas em relação ao mercado em tempo real. Não use para decisões financeiras sem confirmar nas fontes originais.
+---
+
+## Aviso legal
+
+Os indicadores CEPEA/ESALQ (soja, milho, leite e boi gordo ESALQ/B3) são produzidos pela
+**ESALQ-USP / CEPEA** e distribuídos sob licença **Creative Commons BY-NC** (não comercial,
+com atribuição). Este projeto é de uso informativo e educacional, com atribuição completa
+da fonte em todas as respostas.
+
+**Para uso comercial ou redistribuição em produto pago**, obtenha licença junto ao
+CEPEA ([cepea.esalq.usp.br](https://www.cepea.esalq.usp.br)) ou um provedor licenciado
+(ex.: Agrolink, Notícias Agrícolas via contrato).
+
+O scraping respeita as fontes: cache local de 15 minutos, sem sobrecarga de requisições.
+
+---
 
 ## Roadmap
 
-- [x] Boi gordo - cotação regional (Scot) + indicador nacional (ESALQ/B3)
-- [x] Conversão de unidades (arroba, saca, hectare, alqueire...)
+**Entregue**
+- [x] Boi gordo - cotação regional (Scot Consultoria) + indicador nacional (ESALQ/B3)
 - [x] Soja - indicador CEPEA/ESALQ Porto de Paranaguá
 - [x] Milho - indicador CEPEA/ESALQ
 - [x] Leite - preço ao produtor CEPEA por estado
-- [ ] Café - indicador ESALQ e NY
-- [ ] Câmbio USD/BRL (impacto nas commodities)
-- [ ] Exportações - dados MDIC
-- [ ] Safra - estimativas CONAB
+- [x] Conversões de unidades (arroba, saca, hectare, alqueire, tonelada...)
+
+**Próximos**
+- [ ] Câmbio USD/BRL via Banco Central do Brasil
+- [ ] Exportações via Comex Stat (MDIC)
+- [ ] Calendário de safra via CONAB
 - [ ] Notícias do agro
+- [ ] Futuros B3 (boi gordo, soja, milho)
+- [ ] Clima via Open-Meteo (regiões agrícolas)
+
+---
 
 ## Desenvolvimento
 
 ```bash
-# Instalar dependências de desenvolvimento
-pip install -e ".[dev]"
+git clone https://github.com/DeHor-Labs/mcp-agro-brasil.git
+cd mcp-agro-brasil
+
+# Instalar com uv
+uv sync --extra dev
 
 # Rodar testes
-pytest
+uv run pytest
 
-# Lint e formatação
-ruff check .
-ruff format .
+# Lint
+uv run ruff check .
+uv run ruff format .
 ```
+
+---
 
 ## Licença
 
 MIT - ver [LICENSE](LICENSE).
+
+Desenvolvido por [Nikolas de Hor](https://github.com/nikolasdehor) - nikolasdehor79@gmail.com

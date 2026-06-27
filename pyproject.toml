@@ -18,13 +18,18 @@ keywords = [
     "claude",
     "agro",
     "agronegocio",
+    "cotacoes",
     "brasil",
     "brazil",
     "boi-gordo",
     "cotacao",
     "pecuaria",
+    "soja",
+    "milho",
+    "leite",
     "scot",
     "esalq",
+    "cepea",
     "agritech",
 ]
 classifiers = [
@@ -59,6 +64,7 @@ mcp-agro-brasil = "mcp_agro_brasil.server:main"
 Homepage = "https://github.com/DeHor-Labs/mcp-agro-brasil"
 Repository = "https://github.com/DeHor-Labs/mcp-agro-brasil"
 Issues = "https://github.com/DeHor-Labs/mcp-agro-brasil/issues"
+Changelog = "https://github.com/DeHor-Labs/mcp-agro-brasil/releases"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_agro_brasil"]
