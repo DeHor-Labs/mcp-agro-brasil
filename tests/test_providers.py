@@ -103,7 +103,7 @@ class TestEsalqParsing:
         html = _html_esalq()
         match = _PADRAO_A_VISTA.search(html)
         assert match is not None
-        assert _parse_valor(match.group(1)) == pytest.approx(338.00)
+        assert _parse_valor(match.group(1)) == pytest.approx(338.65)
 
     def test_padrao_sem_match_retorna_none(self) -> None:
         match = _PADRAO_A_VISTA.search("<html>sem cotacao aqui</html>")
@@ -136,7 +136,7 @@ class TestEsalqBusca:
         monkeypatch.setattr(httpx, "Client", lambda **kw: MockClient())
 
         resultado = buscar_indicador_esalq()
-        assert resultado["a_vista"] == pytest.approx(338.00)
+        assert resultado["a_vista"] == pytest.approx(338.65)
         assert resultado["moeda"] == "BRL"
         assert resultado["unidade"] == "@"
         assert "ESALQ" in resultado["fonte"]

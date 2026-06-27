@@ -24,8 +24,8 @@ _HEADERS = {
     ),
     "Accept": "text/html,application/xhtml+xml,application/xhtml+xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Connection": "keep-alive",
+    # Não incluir Accept-Encoding: httpx gerencia descompressão automaticamente;
+    # setar o header manualmente desativa o auto-decompress do httpx.
 }
 
 _TIMEOUT = 15.0

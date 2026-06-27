@@ -26,10 +26,11 @@ _HEADERS = {
 
 _TIMEOUT = 15.0
 
-# Padrão esperado na página: "à vista R$: 338,00" (com variações de espaço/case)
+# A página renderiza uma tabela com colunas: data (dd/mm/yyyy) | valor | variação (%).
+# Captura o valor da primeira linha do tbody (cotação mais recente).
 _PADRAO_A_VISTA = re.compile(
-    r"à\s+vista\s+R\$\s*:\s*([\d.,]+)",
-    re.IGNORECASE,
+    r"<td>\d{2}/\d{2}/\d{4}</td>\s*<td>([\d.,]+)</td>",
+    re.IGNORECASE | re.DOTALL,
 )
 
 
