@@ -1,0 +1,29 @@
+{
+  "latitude": -16.69596,
+  "longitude": -49.255005,
+  "generationtime_ms": 0.048,
+  "utc_offset_seconds": -10800,
+  "timezone": "America/Sao_Paulo",
+  "timezone_abbreviation": "GMT-3",
+  "elevation": 758.0,
+  "daily_units": {
+    "time": "iso8601",
+    "temperature_2m_max": "°C",
+    "temperature_2m_min": "°C",
+    "precipitation_sum": "mm",
+    "precipitation_probability_max": "%"
+  },
+  "daily": {
+    "time": [
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-29",
+      "2026-06-30",
+      "2026-07-01"
+    ],
+    "temperature_2m_max": [29.2, 28.9, 29.6, 30.0, 30.2],
+    "temperature_2m_min": [17.9, 18.6, 18.1, 17.7, 18.6],
+    "precipitation_sum": [0.0, 0.0, 0.0, 0.0, 0.0],
+    "precipitation_probability_max": [0, 0, 0, 0, 0]
+  }
+}

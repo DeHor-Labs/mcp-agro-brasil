@@ -1,6 +1,6 @@
 # mcp-agro-brasil
 
-MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, mais conversões de unidades.
+MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, previsão do tempo, câmbio PTAX e conversões de unidades.
 
 Parte da família [MCP Brasil](https://github.com/DeHor-Labs) junto com
 [mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil) e
@@ -23,9 +23,11 @@ do agronegócio brasileiro em tempo quase real:
 - **Soja** - indicador CEPEA/ESALQ Porto de Paranaguá (R$/saca 60 kg)
 - **Milho** - indicador CEPEA/ESALQ (R$/saca 60 kg)
 - **Leite** - preço ao produtor CEPEA por estado (R$/litro)
+- **Clima** - previsão do tempo (máxima, mínima, chuva) para cidades brasileiras via Open-Meteo
+- **Câmbio** - cotação PTAX oficial USD/BRL via Banco Central do Brasil
 - **Conversões** - arroba, saca, hectare, alqueire e outras unidades do agro
 
-Os dados são obtidos por scraping de páginas públicas com cache local, respeitando as fontes.
+Os dados de cotação são obtidos por scraping de páginas públicas com cache local. Clima e câmbio usam APIs JSON abertas e gratuitas.
 
 ---
 
@@ -94,6 +96,8 @@ Ou adicione ao `.claude/settings.json` do projeto:
 | `cotacao_soja` | Indicador CEPEA/ESALQ de soja - Porto de Paranaguá | - |
 | `cotacao_milho` | Indicador CEPEA/ESALQ de milho | - |
 | `cotacao_leite` | Preço ao produtor CEPEA de leite por estado | `estado` (ex.: "GO", "Brasil") |
+| `clima_previsao` | Previsão do tempo para cidade brasileira (Open-Meteo) | `cidade` (ex.: "Goiânia"), `dias` (1-7) |
+| `cambio_dolar` | Cotação PTAX oficial USD/BRL (Banco Central do Brasil) | - |
 | `converter` | Converte entre unidades do agro (peso e área) | `valor`, `de_unidade`, `para_unidade` |
 | `listar_pracas` | Lista praças disponíveis no provider Scot | - |
 | `listar_produtos` | Lista todos os produtos com cotação disponível | - |
@@ -158,6 +162,8 @@ RS, SC, PR, SP, MG, GO, BA, RJ, ES e Brasil (média nacional).
 - **Scot Consultoria** - cotações regionais de boi gordo: [scotconsultoria.com.br](https://www.scotconsultoria.com.br/cotacoes/boi-gordo/)
 - **ESALQ/B3 via Notícias Agrícolas** - indicador nacional boi gordo: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/boi-gordo/boi-gordo-indicador-esalq-bmf)
 - **CEPEA/ESALQ via Notícias Agrícolas** - soja, milho e leite: [noticiasagricolas.com.br](https://www.noticiasagricolas.com.br/cotacoes/)
+- **Open-Meteo** - previsão do tempo: [open-meteo.com](https://open-meteo.com/) (API aberta, sem token)
+- **Banco Central do Brasil (PTAX)** - câmbio USD/BRL: [olinda.bcb.gov.br](https://olinda.bcb.gov.br/) (API aberta, sem token)
 
 ---
 
@@ -184,14 +190,14 @@ O scraping respeita as fontes: cache local de 15 minutos, sem sobrecarga de requ
 - [x] Milho - indicador CEPEA/ESALQ
 - [x] Leite - preço ao produtor CEPEA por estado
 - [x] Conversões de unidades (arroba, saca, hectare, alqueire, tonelada...)
+- [x] Clima - previsão do tempo por cidade via Open-Meteo
+- [x] Câmbio USD/BRL PTAX via Banco Central do Brasil
 
 **Próximos**
-- [ ] Câmbio USD/BRL via Banco Central do Brasil
 - [ ] Exportações via Comex Stat (MDIC)
 - [ ] Calendário de safra via CONAB
 - [ ] Notícias do agro
 - [ ] Futuros B3 (boi gordo, soja, milho)
-- [ ] Clima via Open-Meteo (regiões agrícolas)
 
 ---
 

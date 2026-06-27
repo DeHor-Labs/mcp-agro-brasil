@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from mcp_agro_brasil.providers import esalq, noticias_agricolas, scot
+from mcp_agro_brasil.providers import bcb, esalq, noticias_agricolas, open_meteo, scot
 
 # ---------------------------------------------------------------------------
 # Cache em memória simples
@@ -155,6 +155,8 @@ PRODUTOS_DISPONIVEIS: list[str] = [
     "soja",
     "milho",
     "leite",
+    "clima",
+    "cambio_dolar",
 ]
 
 ESTADOS_LEITE: list[str] = [
@@ -249,6 +251,74 @@ def cotacao_leite(estado: str = "Brasil") -> dict[str, Any]:
         dados = noticias_agricolas.buscar_cotacao_leite(estado)
     except Exception as exc:
         raise RuntimeError(f"Falha ao buscar cotação de leite: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    _cache_set(chave, resultado)
+    return resultado
+
+
+def clima_previsao(cidade: str, dias: int = 5) -> dict[str, Any]:
+    """Retorna previsão do tempo para uma cidade brasileira, com cache de 1 hora.
+
+    Args:
+        cidade: Nome da cidade (ex.: "Goiânia", "Sorriso MT", "Uberaba").
+        dias: Número de dias de previsão (1 a 7). Padrão: 5.
+
+    Returns:
+        Dicionário com: fonte, cidade, cidade_resolvida, dias (lista), data_consulta.
+        Cada dia contém: data, temp_max_c, temp_min_c, precipitacao_mm, prob_chuva_pct.
+
+    Raises:
+        ValueError: Cidade não encontrada na API de geocoding.
+        RuntimeError: Se o provider falhar.
+    """
+    dias = max(1, min(dias, 7))
+    chave = f"clima:{cidade.lower().strip()}:{dias}"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = open_meteo.buscar_previsao(cidade, dias)
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar previsão do tempo: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    # TTL diferenciado: clima muda menos que cotação, 1 hora é suficiente
+    _CACHE[f"clima:{cidade.lower().strip()}:{dias}"] = {
+        "ts": time.monotonic(),
+        "data": resultado,
+    }
+    return resultado
+
+
+_TTL_CAMBIO_SEGUNDOS = 4 * 60 * 60  # 4 horas (PTAX é divulgado 1x ao dia)
+
+
+def cambio_dolar() -> dict[str, Any]:
+    """Retorna a cotação PTAX oficial do dólar (USD/BRL), com cache de 4 horas.
+
+    Usa a API Olinda do Banco Central do Brasil. Se hoje não tiver PTAX
+    (fim de semana ou feriado), retorna o último dia útil disponível.
+
+    Returns:
+        Dicionário com: fonte, moeda_origem, moeda_destino, compra, venda,
+        data_hora_cotacao, data_consulta, cache_hit.
+
+    Raises:
+        RuntimeError: Se o provider BCB falhar ou não houver cotação recente.
+    """
+    chave = "cambio:usd:ptax"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = bcb.buscar_ptax()
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar câmbio PTAX: {exc}") from exc
 
     resultado = {**dados, "cache_hit": False}
     _cache_set(chave, resultado)

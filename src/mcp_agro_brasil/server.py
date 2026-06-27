@@ -8,6 +8,8 @@ Tools expostas:
 - cotacao_soja          : indicador CEPEA/ESALQ de soja - Porto de Paranaguá
 - cotacao_milho         : indicador CEPEA/ESALQ de milho
 - cotacao_leite         : preço ao produtor CEPEA de leite por estado
+- clima_previsao        : previsão do tempo para cidade brasileira (Open-Meteo)
+- cambio_dolar          : cotação PTAX oficial USD/BRL (Banco Central do Brasil)
 - converter             : conversões de unidades do agronegócio (peso e área)
 - listar_pracas         : praças disponíveis no provider Scot
 - listar_produtos       : produtos com cotação disponível
@@ -27,10 +29,11 @@ app = fastmcp.FastMCP(
         "Ferramentas de dados do agronegócio brasileiro. "
         "Cotações de boi gordo via Scot Consultoria (regional) e ESALQ/B3 (nacional). "
         "Cotações de grãos: soja e milho via indicadores CEPEA/ESALQ; leite ao produtor CEPEA por estado. "
+        "Previsão do tempo para cidades brasileiras via Open-Meteo (máxima, mínima, chuva). "
+        "Câmbio dólar PTAX oficial via Banco Central do Brasil. "
         "Conversões de unidades: arroba, saca, hectare, alqueire e mais. "
         "AVISO: cotações são scrapeadas de fontes públicas e podem ter defasagem de "
-        "minutos a horas em relação ao mercado em tempo real. "
-        "Roadmap: câmbio, exportação, safra, notícias."
+        "minutos a horas em relação ao mercado em tempo real."
     ),
 )
 
@@ -116,6 +119,40 @@ def cotacao_leite(estado: str = "Brasil") -> dict[str, object]:
 
 
 @app.tool()
+def clima_previsao(cidade: str, dias: int = 5) -> dict[str, object]:
+    """Retorna a previsão do tempo para uma cidade brasileira.
+
+    Fonte: Open-Meteo (https://open-meteo.com/). API aberta, sem token.
+    Resolve o nome da cidade por geocoding antes de buscar a previsão.
+
+    Args:
+        cidade: Nome da cidade (ex.: "Goiânia", "Sorriso MT", "Uberaba").
+        dias: Número de dias de previsão, de 1 a 7. Padrão: 5.
+
+    Returns:
+        Dicionário com: fonte, cidade, cidade_resolvida, data_consulta,
+        dias (lista). Cada dia contém: data, temp_max_c, temp_min_c,
+        precipitacao_mm, prob_chuva_pct.
+    """
+    return cotacao.clima_previsao(cidade, dias)
+
+
+@app.tool()
+def cambio_dolar() -> dict[str, object]:
+    """Retorna a cotação PTAX oficial do dólar americano (USD/BRL).
+
+    Fonte: Banco Central do Brasil (API Olinda/PTAX).
+    PTAX é a taxa de câmbio de referência oficial para contratos e conversões
+    tributárias. Em fins de semana e feriados, retorna o último dia útil.
+
+    Returns:
+        Dicionário com: fonte, moeda_origem (USD), moeda_destino (BRL),
+        compra, venda, data_hora_cotacao, data_consulta, cache_hit.
+    """
+    return cotacao.cambio_dolar()
+
+
+@app.tool()
 def converter(valor: float, de_unidade: str, para_unidade: str) -> dict[str, object]:
     """Converte valor entre unidades do agronegócio (peso ou área).
 
@@ -174,7 +211,8 @@ def listar_produtos() -> dict[str, object]:
         "total": len(cotacao.PRODUTOS_DISPONIVEIS),
         "nota": (
             "Para grãos use cotacao_soja, cotacao_milho ou cotacao_leite. "
-            "Para boi gordo use cotacao_boi_gordo ou indicador_esalq."
+            "Para boi gordo use cotacao_boi_gordo ou indicador_esalq. "
+            "Para clima use clima_previsao. Para câmbio use cambio_dolar."
         ),
     }
 

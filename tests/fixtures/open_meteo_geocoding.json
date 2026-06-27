@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "id": 3462377,
+      "name": "Goiânia",
+      "latitude": -16.67861,
+      "longitude": -49.25389,
+      "elevation": 766.0,
+      "feature_code": "PPLA",
+      "country_code": "BR",
+      "admin1_id": 3462372,
+      "admin2_id": 6323974,
+      "timezone": "America/Sao_Paulo",
+      "country_id": 3469034,
+      "country": "Brasil",
+      "admin1": "Goiás",
+      "admin2": "Região Geográfica Imediata de Goiânia"
+    }
+  ],
+  "generationtime_ms": 1.23
+}
