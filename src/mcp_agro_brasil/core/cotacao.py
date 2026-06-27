@@ -14,6 +14,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from mcp_agro_brasil.core import calendario_safra
 from mcp_agro_brasil.providers import (
     bcb,
     comex_stat,
@@ -167,6 +168,8 @@ PRODUTOS_DISPONIVEIS: list[str] = [
     "cambio_dolar",
     "exportacao_agro",
     "noticias_agro",
+    "calendario_safra",
+    "futuros_b3",
 ]
 
 ESTADOS_LEITE: list[str] = [
@@ -404,6 +407,7 @@ def exportacao_agro(produto: str) -> dict[str, Any]:
 # Notícias do agronegócio (RSS)
 # ---------------------------------------------------------------------------
 
+
 _TTL_NOTICIAS_SEGUNDOS = 30 * 60  # 30 minutos
 
 
@@ -437,3 +441,92 @@ def noticias_agro(tema: str | None = None, limite: int = 5) -> dict[str, Any]:
     resultado = {**dados, "cache_hit": False}
     _CACHE[chave] = {"ts": time.monotonic(), "data": resultado}
     return resultado
+
+
+# ---------------------------------------------------------------------------
+# Calendário de safra (dado estático - CONAB)
+# ---------------------------------------------------------------------------
+
+
+def calendario_safra_consulta(
+    cultura: str,
+    regiao: str | None = None,
+) -> dict[str, Any]:
+    """Consulta o calendário de plantio e colheita por cultura e região.
+
+    Dado estático curado a partir do CONAB. Sem chamadas de rede.
+
+    Args:
+        cultura: Nome da cultura (soja, milho_1a, milho_2a, feijao, cafe,
+                 sorgo, algodao). Aliases são aceitos.
+        regiao: Região produtora (Centro-Oeste, Sul, Sudeste, MATOPIBA,
+                Nordeste) ou sigla de estado (ex.: "GO", "PR").
+                None retorna todas as regiões.
+
+    Returns:
+        Dicionário com: cultura_consultada, cultura_normalizada, fonte,
+        data_consulta, resultado (quando região informada) ou regioes (lista).
+
+    Raises:
+        ValueError: Cultura não reconhecida.
+    """
+    return calendario_safra.consultar_calendario_safra(cultura, regiao)
+
+
+# ---------------------------------------------------------------------------
+# Futuros B3 (boi gordo BGI, soja, milho, café)
+# ---------------------------------------------------------------------------
+
+_FUTUROS_B3_AVISO = (
+    "Cotação de futuros B3 requer fonte de dados licenciada. "
+    "A API brapi.dev exige plano pago (Pro/Enterprise) para contratos futuros "
+    "(retorna HTTP 401 sem token; ações spot como VALE3 funcionam grátis, futuros não). "
+    "Yahoo Finance também não indexa futuros da B3 agrícola (BGI, CCM, SFI, ICF). "
+    "Alternativas: brapi.dev Pro (https://brapi.dev), Cedro Technologies "
+    "(https://www.cedrotech.com) ou B3 Direct Feed. "
+    "Esta funcionalidade será integrada quando uma fonte gratuita ou "
+    "open-access estiver disponível."
+)
+
+_FUTUROS_B3_CONTRATOS: list[dict[str, str]] = [
+    {"codigo": "BGI", "descricao": "Boi Gordo B3", "unidade": "R$/@"},
+    {"codigo": "CCM", "descricao": "Milho B3", "unidade": "R$/saca 60 kg"},
+    {"codigo": "SFI", "descricao": "Soja Financeiro B3", "unidade": "R$/saca 60 kg"},
+    {"codigo": "ICF", "descricao": "Café Arábica B3", "unidade": "US$/saca 60 kg"},
+]
+
+
+def futuros_b3(contrato: str = "BGI") -> dict[str, Any]:
+    """Retorna cotação de futuro agrícola da B3.
+
+    ATENÇÃO: Fonte de dados paga ainda não integrada. Retorna informação
+    honesta sobre a situação e as alternativas disponíveis.
+
+    Args:
+        contrato: Código do contrato (BGI, CCM, SFI, ICF). Padrão: "BGI".
+
+    Returns:
+        Dicionário com: contrato, disponivel (False), aviso, contrato_info,
+        contratos_suportados, alternativa_vista, fonte_sugerida, data_consulta.
+    """
+    from datetime import date
+
+    contrato_norm = contrato.upper().strip()
+    contrato_info = next(
+        (c for c in _FUTUROS_B3_CONTRATOS if c["codigo"] == contrato_norm),
+        None,
+    )
+
+    return {
+        "contrato": contrato_norm,
+        "disponivel": False,
+        "aviso": _FUTUROS_B3_AVISO,
+        "contrato_info": contrato_info,
+        "contratos_suportados": _FUTUROS_B3_CONTRATOS,
+        "alternativa_vista": (
+            "Para preços spot (à vista): use cotacao_boi_gordo (BGI), "
+            "cotacao_soja (SFI), cotacao_milho (CCM) ou cotacao_leite."
+        ),
+        "fonte_sugerida": "https://brapi.dev (plano Pro) ou https://www.cedrotech.com",
+        "data_consulta": date.today().isoformat(),
+    }

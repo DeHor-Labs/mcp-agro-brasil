@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-agro-brasil"
-version = "0.1.0"
-description = "MCP de dados do agronegócio brasileiro - cotações de boi gordo, conversões de unidades e indicadores de mercado."
+version = "0.4.0"
+description = "MCP de dados do agronegócio brasileiro - cotações, calendário de safra, câmbio, clima, exportações e indicadores de mercado."
 authors = [
     { name = "Nikolas de Hor", email = "nikolasdehor79@gmail.com" }
 ]

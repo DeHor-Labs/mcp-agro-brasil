@@ -1,6 +1,6 @@
 # mcp-agro-brasil
 
-MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, previsão do tempo, câmbio PTAX, exportações agro e notícias do setor.
+MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, calendário de safra (CONAB), previsão do tempo, câmbio PTAX, exportações agro e notícias do setor.
 
 Parte da família [MCP Brasil](https://github.com/DeHor-Labs) junto com
 [mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil) e
@@ -27,6 +27,8 @@ do agronegócio brasileiro em tempo quase real:
 - **Câmbio** - cotação PTAX oficial USD/BRL via Banco Central do Brasil
 - **Exportações** - volume (kg/ton) e valor FOB (USD) exportado de soja, carne bovina e milho via Comex Stat / MDIC
 - **Notícias** - últimas manchetes do agronegócio via RSS (Canal Rural), com filtro por tema
+- **Calendário de safra** - janelas de plantio e colheita por cultura e região, curado do CONAB
+- **Futuros B3** - informação sobre contratos BGI, CCM, SFI, ICF (fonte paga; alternativas indicadas)
 - **Conversões** - arroba, saca, hectare, alqueire e outras unidades do agro
 
 Os dados de cotação são obtidos por scraping de páginas públicas com cache local. Clima e câmbio usam APIs JSON abertas e gratuitas.
@@ -102,6 +104,8 @@ Ou adicione ao `.claude/settings.json` do projeto:
 | `cambio_dolar` | Cotação PTAX oficial USD/BRL (Banco Central do Brasil) | - |
 | `exportacao_agro` | Volume e valor FOB exportado via Comex Stat / MDIC | `produto` ("soja", "carne_bovina", "milho") |
 | `noticias_agro` | Últimas notícias do agronegócio via RSS | `tema` (ex.: "soja"), `limite` (1-20) |
+| `calendario_safra` | Calendário de plantio e colheita por cultura e região (CONAB) | `cultura` (ex.: "soja"), `regiao` (ex.: "GO", "Centro-Oeste") |
+| `futuros_b3` | Futuros agrícolas B3 - informa disponibilidade (requer fonte paga) | `contrato` ("BGI", "CCM", "SFI", "ICF") |
 | `converter` | Converte entre unidades do agro (peso e área) | `valor`, `de_unidade`, `para_unidade` |
 | `listar_pracas` | Lista praças disponíveis no provider Scot | - |
 | `listar_produtos` | Lista todos os produtos com cotação disponível | - |
@@ -201,9 +205,12 @@ O scraping respeita as fontes: cache local de 15 minutos, sem sobrecarga de requ
 - [x] Exportações do agronegócio via Comex Stat / MDIC (soja, carne bovina, milho)
 - [x] Notícias do agronegócio via RSS (Canal Rural)
 
+**Onda 3 - Safra e Mercado Futuro**
+- [x] Calendário de safra via CONAB (soja, milho 1a/2a, feijão, café, sorgo, algodão - 5 regiões)
+- [x] Futuros B3 (BGI, CCM, SFI, ICF) - tool implementada; fonte paga não integrada (brapi.dev Pro / Cedro)
+
 **Próximos**
-- [ ] Calendário de safra via CONAB
-- [ ] Futuros B3 (boi gordo, soja, milho)
+- [ ] Integrar futuros B3 quando fonte gratuita ou open-access estiver disponível
 
 ---
 

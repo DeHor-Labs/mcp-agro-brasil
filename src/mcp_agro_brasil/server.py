@@ -12,6 +12,8 @@ Tools expostas:
 - cambio_dolar          : cotação PTAX oficial USD/BRL (Banco Central do Brasil)
 - exportacao_agro       : dados de exportação do agronegócio (Comex Stat / MDIC)
 - noticias_agro         : últimas notícias do agronegócio via RSS (Canal Rural)
+- calendario_safra      : calendário de plantio e colheita por cultura e região (CONAB)
+- futuros_b3            : futuros agrícolas B3 (requer fonte paga - informação honesta)
 - converter             : conversões de unidades do agronegócio (peso e área)
 - listar_pracas         : praças disponíveis no provider Scot
 - listar_produtos       : produtos com cotação disponível
@@ -26,7 +28,7 @@ from mcp_agro_brasil.core import conversao, cotacao
 
 app = fastmcp.FastMCP(
     name="MCP Agro Brasil",
-    version="0.3.0",
+    version="0.4.0",
     instructions=(
         "Ferramentas de dados do agronegócio brasileiro. "
         "Cotações de boi gordo via Scot Consultoria (regional) e ESALQ/B3 (nacional). "
@@ -35,6 +37,8 @@ app = fastmcp.FastMCP(
         "Câmbio dólar PTAX oficial via Banco Central do Brasil. "
         "Exportações do agronegócio (soja, carne bovina, milho) via Comex Stat / MDIC. "
         "Notícias do agronegócio via RSS (Canal Rural), com filtro por tema. "
+        "Calendário de plantio e colheita das principais culturas por região (dado CONAB). "
+        "Futuros B3 agrícolas: informação sobre disponibilidade (fonte paga não integrada). "
         "Conversões de unidades: arroba, saca, hectare, alqueire e mais. "
         "AVISO: cotações são scrapeadas de fontes públicas e podem ter defasagem de "
         "minutos a horas em relação ao mercado em tempo real."
@@ -193,6 +197,54 @@ def noticias_agro(tema: str = "", limite: int = 5) -> dict[str, object]:
 
 
 @app.tool()
+def calendario_safra(cultura: str, regiao: str = "") -> dict[str, object]:
+    """Consulta o calendário de plantio e colheita de uma cultura por região (CONAB).
+
+    Dado estático curado a partir do CONAB - Calendário de Plantio e Colheita de
+    Grãos no Brasil. Sem chamadas de rede; resposta instantânea.
+
+    Args:
+        cultura: Nome da cultura. Aceitos: soja, milho_1a, milho_2a (safrinha),
+                 feijao, cafe, sorgo, algodao. Aliases comuns reconhecidos
+                 (ex.: "milho" -> milho_1a, "safrinha" -> milho_2a).
+        regiao: Região produtora (Centro-Oeste, Sul, Sudeste, MATOPIBA, Nordeste)
+                ou sigla de estado (ex.: "GO", "PR", "MT"). String vazia retorna
+                todas as regiões cadastradas.
+
+    Returns:
+        Dicionário com: cultura_consultada, cultura_normalizada, fonte,
+        data_consulta e:
+        - 'resultado' com {regiao, plantio_meses, colheita_meses, observacao}
+          quando uma região é informada;
+        - 'regioes' (lista) quando nenhuma região é informada.
+    """
+    regiao_arg: str | None = regiao.strip() if regiao.strip() else None
+    return cotacao.calendario_safra_consulta(cultura, regiao_arg)
+
+
+@app.tool()
+def futuros_b3(contrato: str = "BGI") -> dict[str, object]:
+    """Retorna informações sobre futuros agrícolas da B3 (boi gordo, soja, milho, café).
+
+    ATENÇÃO: Cotação de futuros B3 requer fonte de dados licenciada.
+    brapi.dev exige plano pago para futuros (HTTP 401 sem token).
+    Yahoo Finance não indexa futuros da B3 agrícola.
+    Esta tool retorna informação honesta sobre a situação e alternativas.
+
+    Para preços spot (à vista) use: cotacao_boi_gordo, cotacao_soja, cotacao_milho.
+
+    Args:
+        contrato: Código do contrato B3. Aceitos: BGI (boi gordo), CCM (milho),
+                  SFI (soja financeiro), ICF (café arábica). Padrão: "BGI".
+
+    Returns:
+        Dicionário com: contrato, disponivel (False), aviso, contrato_info,
+        contratos_suportados, alternativa_vista, fonte_sugerida, data_consulta.
+    """
+    return cotacao.futuros_b3(contrato)
+
+
+@app.tool()
 def converter(valor: float, de_unidade: str, para_unidade: str) -> dict[str, object]:
     """Converte valor entre unidades do agronegócio (peso ou área).
 
@@ -254,7 +306,9 @@ def listar_produtos() -> dict[str, object]:
             "Para boi gordo use cotacao_boi_gordo ou indicador_esalq. "
             "Para clima use clima_previsao. Para câmbio use cambio_dolar. "
             "Para exportações use exportacao_agro (soja, carne_bovina, milho). "
-            "Para notícias use noticias_agro."
+            "Para notícias use noticias_agro. "
+            "Para calendário de safra use calendario_safra. "
+            "Para futuros B3 use futuros_b3 (fonte paga não integrada)."
         ),
     }
 
