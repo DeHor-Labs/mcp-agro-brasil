@@ -14,7 +14,15 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from mcp_agro_brasil.providers import bcb, esalq, noticias_agricolas, open_meteo, scot
+from mcp_agro_brasil.providers import (
+    bcb,
+    comex_stat,
+    esalq,
+    noticias_agricolas,
+    open_meteo,
+    rss_agro,
+    scot,
+)
 
 # ---------------------------------------------------------------------------
 # Cache em memória simples
@@ -157,6 +165,8 @@ PRODUTOS_DISPONIVEIS: list[str] = [
     "leite",
     "clima",
     "cambio_dolar",
+    "exportacao_agro",
+    "noticias_agro",
 ]
 
 ESTADOS_LEITE: list[str] = [
@@ -347,4 +357,86 @@ def indicador_esalq() -> dict[str, Any]:
 
     resultado = {**dados, "cache_hit": False}
     _cache_set(chave, resultado)
+    return resultado
+
+
+# ---------------------------------------------------------------------------
+# Exportação agro (Comex Stat / MDIC)
+# ---------------------------------------------------------------------------
+
+_TTL_EXPORTACAO_SEGUNDOS = 24 * 60 * 60  # 1 dia (dados mensais, mudam raramente)
+
+
+def exportacao_agro(produto: str) -> dict[str, Any]:
+    """Retorna dados de exportação para um produto do agronegócio, com cache de 1 dia.
+
+    Usa a API pública Comex Stat do MDIC. Dados mensais com defasagem de 1-2 meses.
+
+    Args:
+        produto: Identificador do produto. Aceitos: "soja", "carne_bovina", "milho".
+
+    Returns:
+        Dicionário com: fonte, produto, ncms, periodo, ano, mes,
+        fob_usd, peso_kg, peso_ton, data_consulta, cache_hit.
+
+    Raises:
+        ValueError: Produto desconhecido.
+        RuntimeError: Se o provider falhar ou não houver dados.
+    """
+    chave = f"exportacao:{produto.lower().strip()}"
+    cached = _cache_get(chave)
+    if cached is not None:
+        return {**cached, "cache_hit": True}
+
+    try:
+        dados = comex_stat.buscar_exportacao(produto)
+    except ValueError:
+        raise
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar exportação de '{produto}': {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    _CACHE[chave] = {"ts": time.monotonic(), "data": resultado}
+    return resultado
+
+
+# ---------------------------------------------------------------------------
+# Notícias do agronegócio (RSS)
+# ---------------------------------------------------------------------------
+
+_TTL_NOTICIAS_SEGUNDOS = 30 * 60  # 30 minutos
+
+
+def noticias_agro(tema: str | None = None, limite: int = 5) -> dict[str, Any]:
+    """Retorna as últimas notícias do agronegócio, com cache de 30 minutos.
+
+    Args:
+        tema: Palavra-chave para filtrar títulos (ex: "soja", "boi gordo").
+              None para retornar as mais recentes sem filtro.
+        limite: Número máximo de notícias (padrão: 5, máximo: 20).
+
+    Returns:
+        Dicionário com: fonte, feeds_consultados, tema_filtro, total,
+        noticias (lista), data_consulta, cache_hit.
+        Cada notícia contém: titulo, link, data, descricao, fonte.
+
+    Raises:
+        RuntimeError: Se todos os feeds RSS falharem.
+    """
+    tema_norm = tema.lower().strip() if tema else None
+    chave = f"noticias:rss:{tema_norm or 'todas'}:{limite}"
+    entrada = _CACHE.get(chave)
+    if (
+        entrada is not None
+        and time.monotonic() - entrada["ts"] <= _TTL_NOTICIAS_SEGUNDOS
+    ):
+        return {**entrada["data"], "cache_hit": True}
+
+    try:
+        dados = rss_agro.buscar_noticias(tema=tema, limite=limite)
+    except Exception as exc:
+        raise RuntimeError(f"Falha ao buscar notícias: {exc}") from exc
+
+    resultado = {**dados, "cache_hit": False}
+    _CACHE[chave] = {"ts": time.monotonic(), "data": resultado}
     return resultado

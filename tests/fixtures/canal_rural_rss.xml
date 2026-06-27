@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>Canal Rural</title>
+    <link>https://www.canalrural.com.br/</link>
+    <description>O Canal Rural é uma referência no agronegócio brasileiro.</description>
+    <language>pt-BR</language>
+    <lastBuildDate>Fri, 27 Jun 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+        <title>Soja: exportações batem recorde em maio de 2026</title>
+        <link>https://www.canalrural.com.br/agricultura/soja-exportacoes-recorde-maio-2026/</link>
+        <pubDate>Fri, 27 Jun 2026 09:00:00 +0000</pubDate>
+        <description><![CDATA[Exportações de soja atingiram novo recorde histórico no mês de maio.]]></description>
+        <dc:creator>Redação Canal Rural</dc:creator>
+    </item>
+    <item>
+        <title>Arroba do boi gordo encerra semana em alta nas principais praças</title>
+        <link>https://www.canalrural.com.br/pecuaria/boi-gordo-alta-semana/</link>
+        <pubDate>Fri, 27 Jun 2026 08:30:00 +0000</pubDate>
+        <description><![CDATA[Cotações do boi gordo encerraram a semana com valorização nas principais regiões produtoras.]]></description>
+        <dc:creator>Redação Canal Rural</dc:creator>
+    </item>
+    <item>
+        <title>Milho: safra 2026 deve superar estimativas do IBGE</title>
+        <link>https://www.canalrural.com.br/agricultura/milho-safra-2026-ibge/</link>
+        <pubDate>Thu, 26 Jun 2026 22:00:00 +0000</pubDate>
+        <description><![CDATA[Produção de milho na safra 2025/26 deve superar as estimativas iniciais do IBGE, segundo analistas.]]></description>
+        <dc:creator>Redação Canal Rural</dc:creator>
+    </item>
+    <item>
+        <title>Plano Safra 2026/27 será anunciado com novidades para agricultura familiar</title>
+        <link>https://www.canalrural.com.br/economia/plano-safra-2026-27-agricultura-familiar/</link>
+        <pubDate>Thu, 26 Jun 2026 20:00:00 +0000</pubDate>
+        <description><![CDATA[Governo federal deve anunciar na próxima semana o Plano Safra com novidades para agricultores familiares.]]></description>
+        <dc:creator>Redação Canal Rural</dc:creator>
+    </item>
+    <item>
+        <title>Chuvas no Centro-Oeste preocupam produtores de algodão</title>
+        <link>https://www.canalrural.com.br/agricultura/chuvas-centro-oeste-algodao/</link>
+        <pubDate>Thu, 26 Jun 2026 18:00:00 +0000</pubDate>
+        <description><![CDATA[Volume de chuvas acima da média no Centro-Oeste pode afetar a colheita de algodão na região.]]></description>
+        <dc:creator>Redação Canal Rural</dc:creator>
+    </item>
+</channel>
+</rss>

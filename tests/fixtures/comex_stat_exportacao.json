@@ -1,0 +1,42 @@
+{
+    "data": {
+        "list": [
+            {
+                "coNcm": "12019000",
+                "year": "2026",
+                "monthNumber": "05",
+                "ncm": "Soja, mesmo triturada, exceto para semeadura",
+                "metricFOB": "6305010428",
+                "metricKG": "14825071268"
+            },
+            {
+                "coNcm": "02023000",
+                "year": "2026",
+                "monthNumber": "05",
+                "ncm": "Carnes desossadas de bovino, congeladas",
+                "metricFOB": "1525565378",
+                "metricKG": "237234078"
+            },
+            {
+                "coNcm": "02013000",
+                "year": "2026",
+                "monthNumber": "05",
+                "ncm": "Carnes desossadas de bovino, frescas ou refrigeradas",
+                "metricFOB": "171913256",
+                "metricKG": "22751492"
+            },
+            {
+                "coNcm": "10059010",
+                "year": "2026",
+                "monthNumber": "05",
+                "ncm": "Milho em grão, exceto para semeadura",
+                "metricFOB": "61044553",
+                "metricKG": "249314295"
+            }
+        ]
+    },
+    "success": true,
+    "message": null,
+    "processo_info": null,
+    "language": "pt"
+}

@@ -10,6 +10,8 @@ Tools expostas:
 - cotacao_leite         : preço ao produtor CEPEA de leite por estado
 - clima_previsao        : previsão do tempo para cidade brasileira (Open-Meteo)
 - cambio_dolar          : cotação PTAX oficial USD/BRL (Banco Central do Brasil)
+- exportacao_agro       : dados de exportação do agronegócio (Comex Stat / MDIC)
+- noticias_agro         : últimas notícias do agronegócio via RSS (Canal Rural)
 - converter             : conversões de unidades do agronegócio (peso e área)
 - listar_pracas         : praças disponíveis no provider Scot
 - listar_produtos       : produtos com cotação disponível
@@ -24,13 +26,15 @@ from mcp_agro_brasil.core import conversao, cotacao
 
 app = fastmcp.FastMCP(
     name="MCP Agro Brasil",
-    version="0.2.0",
+    version="0.3.0",
     instructions=(
         "Ferramentas de dados do agronegócio brasileiro. "
         "Cotações de boi gordo via Scot Consultoria (regional) e ESALQ/B3 (nacional). "
         "Cotações de grãos: soja e milho via indicadores CEPEA/ESALQ; leite ao produtor CEPEA por estado. "
         "Previsão do tempo para cidades brasileiras via Open-Meteo (máxima, mínima, chuva). "
         "Câmbio dólar PTAX oficial via Banco Central do Brasil. "
+        "Exportações do agronegócio (soja, carne bovina, milho) via Comex Stat / MDIC. "
+        "Notícias do agronegócio via RSS (Canal Rural), com filtro por tema. "
         "Conversões de unidades: arroba, saca, hectare, alqueire e mais. "
         "AVISO: cotações são scrapeadas de fontes públicas e podem ter defasagem de "
         "minutos a horas em relação ao mercado em tempo real."
@@ -153,6 +157,42 @@ def cambio_dolar() -> dict[str, object]:
 
 
 @app.tool()
+def exportacao_agro(produto: str = "soja") -> dict[str, object]:
+    """Retorna dados de exportação do agronegócio brasileiro (volume e valor FOB).
+
+    Fonte: Comex Stat / MDIC (API pública, dados mensais com defasagem de 1-2 meses).
+
+    Args:
+        produto: Produto a consultar. Aceitos: "soja", "carne_bovina", "milho".
+                 Padrão: "soja".
+
+    Returns:
+        Dicionário com: produto, ncms, periodo (YYYY-MM), ano, mes,
+        fob_usd (USD FOB total), peso_kg, peso_ton, fonte, data_consulta, cache_hit.
+    """
+    return cotacao.exportacao_agro(produto)
+
+
+@app.tool()
+def noticias_agro(tema: str = "", limite: int = 5) -> dict[str, object]:
+    """Retorna as últimas notícias do agronegócio via RSS.
+
+    Fonte: Canal Rural (https://www.canalrural.com.br).
+
+    Args:
+        tema: Palavra-chave para filtrar manchetes (ex: "soja", "boi gordo", "milho").
+              String vazia retorna as mais recentes sem filtro. Padrão: "".
+        limite: Número de notícias (1-20). Padrão: 5.
+
+    Returns:
+        Dicionário com: feeds_consultados, tema_filtro, total, noticias (lista),
+        data_consulta, cache_hit.
+        Cada notícia: titulo, link, data, descricao, fonte.
+    """
+    return cotacao.noticias_agro(tema=tema if tema else None, limite=limite)
+
+
+@app.tool()
 def converter(valor: float, de_unidade: str, para_unidade: str) -> dict[str, object]:
     """Converte valor entre unidades do agronegócio (peso ou área).
 
@@ -212,7 +252,9 @@ def listar_produtos() -> dict[str, object]:
         "nota": (
             "Para grãos use cotacao_soja, cotacao_milho ou cotacao_leite. "
             "Para boi gordo use cotacao_boi_gordo ou indicador_esalq. "
-            "Para clima use clima_previsao. Para câmbio use cambio_dolar."
+            "Para clima use clima_previsao. Para câmbio use cambio_dolar. "
+            "Para exportações use exportacao_agro (soja, carne_bovina, milho). "
+            "Para notícias use noticias_agro."
         ),
     }
 
