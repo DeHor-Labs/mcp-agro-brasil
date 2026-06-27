@@ -426,10 +426,7 @@ def noticias_agro(tema: str | None = None, limite: int = 5) -> dict[str, Any]:
     tema_norm = tema.lower().strip() if tema else None
     chave = f"noticias:rss:{tema_norm or 'todas'}:{limite}"
     entrada = _CACHE.get(chave)
-    if (
-        entrada is not None
-        and time.monotonic() - entrada["ts"] <= _TTL_NOTICIAS_SEGUNDOS
-    ):
+    if entrada is not None and time.monotonic() - entrada["ts"] <= _TTL_NOTICIAS_SEGUNDOS:
         return {**entrada["data"], "cache_hit": True}
 
     try:

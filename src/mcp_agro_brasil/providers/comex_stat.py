@@ -150,9 +150,7 @@ def buscar_exportacao(produto: str) -> dict[str, Any]:
     produto_lower = produto.lower().strip()
     if produto_lower not in _PRODUTOS:
         validos = ", ".join(PRODUTOS_EXPORTACAO)
-        raise ValueError(
-            f"Produto '{produto}' desconhecido. Valores aceitos: {validos}."
-        )
+        raise ValueError(f"Produto '{produto}' desconhecido. Valores aceitos: {validos}.")
 
     info = _PRODUTOS[produto_lower]
     periodo = _periodo_mais_recente()

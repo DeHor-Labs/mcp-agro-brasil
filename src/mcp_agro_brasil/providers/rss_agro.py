@@ -115,9 +115,7 @@ def buscar_noticias(tema: str | None = None, limite: int = 5) -> dict[str, Any]:
 
     for feed in _FEEDS:
         try:
-            with httpx.Client(
-                headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True
-            ) as client:
+            with httpx.Client(headers=_HEADERS, timeout=_TIMEOUT, follow_redirects=True) as client:
                 resp = client.get(feed["url"])
                 resp.raise_for_status()
                 itens = _parsear_itens(resp.text, feed["nome"])
@@ -127,9 +125,7 @@ def buscar_noticias(tema: str | None = None, limite: int = 5) -> dict[str, Any]:
             erros.append(f"{feed['nome']}: {exc}")
 
     if not feeds_ok:
-        raise RuntimeError(
-            f"Todos os feeds de notícias falharam. Erros: {'; '.join(erros)}"
-        )
+        raise RuntimeError(f"Todos os feeds de notícias falharam. Erros: {'; '.join(erros)}")
 
     # Filtra por tema se fornecido
     if tema_lower:

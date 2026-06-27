@@ -158,9 +158,7 @@ class TestBuscarNoticiasFiltro:
         for noticia in resultado["noticias"]:
             assert "milho" in noticia["titulo"].lower()
 
-    def test_tema_sem_resultado_retorna_lista_vazia(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_tema_sem_resultado_retorna_lista_vazia(self, monkeypatch: pytest.MonkeyPatch) -> None:
         self._mock_httpx(monkeypatch)
         resultado = buscar_noticias(tema="abacaxi_improbavel_xyz")
         assert resultado["total"] == 0
@@ -179,9 +177,7 @@ class TestBuscarNoticiasFiltro:
 
 
 class TestBuscarNoticiasErro:
-    def test_levanta_runtimeerror_quando_feed_falha(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_levanta_runtimeerror_quando_feed_falha(self, monkeypatch: pytest.MonkeyPatch) -> None:
         import httpx
 
         class MockClient:

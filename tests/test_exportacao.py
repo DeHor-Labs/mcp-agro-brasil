@@ -18,9 +18,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def _fixture_exportacao() -> dict:
-    return json.loads(
-        (FIXTURES / "comex_stat_exportacao.json").read_text(encoding="utf-8")
-    )
+    return json.loads((FIXTURES / "comex_stat_exportacao.json").read_text(encoding="utf-8"))
 
 
 def _mock_client_post(fixture: dict):
@@ -128,15 +126,11 @@ class TestBuscarExportacaoNcms:
         assert len(soja) == 1
         assert int(soja[0]["metricFOB"]) > 0
 
-    def test_retorna_lista_vazia_quando_sem_dados(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_retorna_lista_vazia_quando_sem_dados(self, monkeypatch: pytest.MonkeyPatch) -> None:
         import httpx
 
         fixture_vazia = {"data": {"list": []}, "success": True}
-        monkeypatch.setattr(
-            httpx, "Client", lambda **kw: _mock_client_post(fixture_vazia)
-        )
+        monkeypatch.setattr(httpx, "Client", lambda **kw: _mock_client_post(fixture_vazia))
 
         registros = _buscar_exportacao_ncms(["99999999"], "2020-01")
         assert registros == []
@@ -200,9 +194,7 @@ class TestBuscarExportacaoSoja:
         assert "soja" in resultado["produto"].lower()
         assert resultado["fob_usd"] > 0
         assert resultado["peso_kg"] > 0
-        assert resultado["peso_ton"] == pytest.approx(
-            resultado["peso_kg"] / 1000, rel=1e-3
-        )
+        assert resultado["peso_ton"] == pytest.approx(resultado["peso_kg"] / 1000, rel=1e-3)
         assert "MDIC" in str(resultado["fonte"]) or "Comex" in str(resultado["fonte"])
         assert "periodo" in resultado
         assert "ano" in resultado
@@ -333,7 +325,5 @@ class TestBuscarExportacaoMilho:
         monkeypatch.setattr(httpx, "Client", lambda **kw: MockClient())
 
         resultado = buscar_exportacao("milho")
-        assert (
-            "milho" in resultado["produto"].lower() or "10059010" in resultado["ncms"]
-        )
+        assert "milho" in resultado["produto"].lower() or "10059010" in resultado["ncms"]
         assert resultado["fob_usd"] > 0
