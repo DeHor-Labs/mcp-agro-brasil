@@ -71,15 +71,11 @@ def _cache_limpo() -> None:
     cotacao._CACHE.clear()
 
 
-def _mock_rede(
-    monkeypatch: pytest.MonkeyPatch, fora_do_ar: tuple[str, ...] = ()
-) -> None:
+def _mock_rede(monkeypatch: pytest.MonkeyPatch, fora_do_ar: tuple[str, ...] = ()) -> None:
     monkeypatch.setattr(httpx, "Client", lambda **kw: _MockClient(fora_do_ar))
 
 
-def _rodar(
-    capsys: pytest.CaptureFixture[str], argv: list[str]
-) -> tuple[int, dict[str, Any]]:
+def _rodar(capsys: pytest.CaptureFixture[str], argv: list[str]) -> tuple[int, dict[str, Any]]:
     codigo = main(argv)
     saida = capsys.readouterr().out
     payload: dict[str, Any] = json.loads(saida)
@@ -87,9 +83,7 @@ def _rodar(
 
 
 def _por_chave(payload: dict[str, Any], produto: str, nivel: str) -> dict[str, Any]:
-    achados = [
-        i for i in payload["itens"] if i["produto"] == produto and i["nivel"] == nivel
-    ]
+    achados = [i for i in payload["itens"] if i["produto"] == produto and i["nivel"] == nivel]
     assert len(achados) == 1, f"esperado 1 item {produto}/{nivel}, veio {len(achados)}"
     item: dict[str, Any] = achados[0]
     return item
@@ -264,9 +258,7 @@ class TestLeiteEstados:
         self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
     ) -> None:
         _mock_rede(monkeypatch)
-        codigo, payload = _rodar(
-            capsys, ["--produtos", "leite", "--leite-estados", "GO"]
-        )
+        codigo, payload = _rodar(capsys, ["--produtos", "leite", "--leite-estados", "GO"])
 
         assert codigo == 0
         assert payload["erros"] == []
@@ -289,9 +281,7 @@ class TestLeiteEstados:
         self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
     ) -> None:
         _mock_rede(monkeypatch)
-        codigo, payload = _rodar(
-            capsys, ["--produtos", "leite", "--leite-estados", "XX,GO"]
-        )
+        codigo, payload = _rodar(capsys, ["--produtos", "leite", "--leite-estados", "XX,GO"])
 
         # XX não existe na tabela, mas GO e Brasil saem; produto teve sucesso.
         assert codigo == 0
