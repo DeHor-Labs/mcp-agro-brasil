@@ -237,6 +237,28 @@ class TestSucessoParcial:
             "leite",
         }
 
+    def test_praca_falha_indicador_ok_gera_erro_parcial(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        _mock_rede(monkeypatch)
+
+        def _explode(praca: str) -> dict[str, Any]:
+            raise RuntimeError("praça indisponível (simulado)")
+
+        monkeypatch.setattr(cotacao, "cotacao_boi_gordo", _explode)
+        codigo, payload = _rodar(capsys, ["--produtos", "boi_gordo"])
+
+        # Indicador nacional saiu, praça Goiânia falhou: item mantido e
+        # sub-falha exposta em erros com o prefixo "parcial: ".
+        assert codigo == 0
+        assert [i["nivel"] for i in payload["itens"]] == ["br"]
+        assert payload["erros"] == [
+            {
+                "produto": "boi_gordo",
+                "motivo": "parcial: praça Goiânia: praça indisponível (simulado)",
+            }
+        ]
+
     def test_produto_desconhecido_vai_para_erros(
         self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
     ) -> None:
@@ -292,4 +314,5 @@ class TestLeiteEstados:
         }
         assert len(payload["erros"]) == 1
         assert payload["erros"][0]["produto"] == "leite"
+        assert payload["erros"][0]["motivo"].startswith("parcial: ")
         assert "XX" in payload["erros"][0]["motivo"]

@@ -7,8 +7,12 @@ Imprime no stdout um único JSON com o contrato fixo:
     {"gerado_em": <ISO 8601 com timezone>, "itens": [...], "erros": [...]}
 
 Sucesso parcial: produto cujo provider falhou entra em "erros" com motivo;
-os demais saem normalmente em "itens". Exit code 0 se pelo menos um produto
-teve sucesso, 1 se todos falharam. Nenhuma chamada de rede acontece no import.
+os demais saem normalmente em "itens". Produto que emitiu itens mas teve
+sub-falha (ex.: indicador nacional OK e praça Goiânia fora do ar) também
+entra em "erros", com motivo prefixado por "parcial: "; o consumidor deve
+tratar essas entradas como aviso, sem descartar os itens do produto.
+Exit code 0 se pelo menos um produto teve sucesso, 1 se todos falharam.
+Nenhuma chamada de rede acontece no import.
 """
 
 from __future__ import annotations
@@ -188,7 +192,13 @@ def main(argv: list[str] | None = None) -> int:
         if novos:
             produtos_com_sucesso += 1
         if motivos:
-            erros.append({"produto": produto, "motivo": "; ".join(motivos)})
+            motivo = "; ".join(motivos)
+            erros.append(
+                {
+                    "produto": produto,
+                    "motivo": f"parcial: {motivo}" if novos else motivo,
+                }
+            )
         elif not novos:
             erros.append({"produto": produto, "motivo": "sem dados"})
 
