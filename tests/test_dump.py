@@ -283,10 +283,13 @@ class TestLeiteEstados:
         _mock_rede(monkeypatch)
         codigo, payload = _rodar(capsys, ["--produtos", "leite", "--leite-estados", "XX,GO"])
 
-        # XX não existe na tabela, mas GO e Brasil saem; produto teve sucesso.
+        # XX não existe na tabela, mas GO e Brasil saem; produto teve sucesso
+        # parcial. O estado ausente deve aparecer em erros, não sumir.
         assert codigo == 0
-        assert payload["erros"] == []
         assert {(i["nivel"], i["uf"]) for i in payload["itens"]} == {
             ("uf", "GO"),
             ("br", None),
         }
+        assert len(payload["erros"]) == 1
+        assert payload["erros"][0]["produto"] == "leite"
+        assert "XX" in payload["erros"][0]["motivo"]

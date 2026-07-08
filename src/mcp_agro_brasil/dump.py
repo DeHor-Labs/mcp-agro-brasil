@@ -187,8 +187,10 @@ def main(argv: list[str] | None = None) -> int:
         itens.extend(novos)
         if novos:
             produtos_com_sucesso += 1
-        else:
-            erros.append({"produto": produto, "motivo": "; ".join(motivos) or "sem dados"})
+        if motivos:
+            erros.append({"produto": produto, "motivo": "; ".join(motivos)})
+        elif not novos:
+            erros.append({"produto": produto, "motivo": "sem dados"})
 
     payload = {
         "gerado_em": datetime.now(UTC).isoformat(),
