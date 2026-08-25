@@ -18,17 +18,24 @@ Tools expostas:
 - listar_pracas         : praças disponíveis no provider Scot
 - listar_produtos       : produtos com cotação disponível
 - listar_unidades       : unidades suportadas pelo módulo de conversão
+
+Tools AgroAPI opcionais (registradas somente com credenciais configuradas):
+- agrofit_buscar_produtos / agrofit_consultar_produto
+- agritec_buscar_municipios / agritec_buscar_culturas
+- agritec_consultar_zarc / agritec_buscar_cultivares
+- bioinsumos_buscar_produtos / agrotermos_buscar
 """
 
 from __future__ import annotations
 
 import fastmcp
 
+from mcp_agro_brasil.agroapi_tools import registrar_tools_agroapi
 from mcp_agro_brasil.core import conversao, cotacao
 
 app = fastmcp.FastMCP(
     name="MCP Agro Brasil",
-    version="0.4.0",
+    version="0.5.0",
     instructions=(
         "Ferramentas de dados do agronegócio brasileiro. "
         "Cotações de boi gordo via Scot Consultoria (regional) e ESALQ/B3 (nacional). "
@@ -324,6 +331,11 @@ def listar_unidades() -> dict[str, object]:
         "unidades_peso": conversao.UNIDADES_PESO,
         "unidades_area": conversao.UNIDADES_AREA,
     }
+
+
+# A integração autenticada não altera o conjunto padrão de tools. O bloco só é
+# registrado quando há token ou par completo de credenciais no ambiente.
+AGROAPI_ENABLED = registrar_tools_agroapi(app)
 
 
 # ---------------------------------------------------------------------------

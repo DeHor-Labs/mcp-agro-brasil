@@ -12,10 +12,12 @@ para assistentes de IA (Claude, etc.). Segue a mesma família de design de
 src/mcp_agro_brasil/
 ├── providers/       # fontes de dados (scraping, APIs)
 │   ├── scot.py      # Scot Consultoria - cotação regional boi gordo (HTML)
-│   └── esalq.py     # ESALQ/B3 via Notícias Agrícolas - indicador nacional
+│   ├── esalq.py     # ESALQ/B3 via Notícias Agrícolas - indicador nacional
+│   └── agroapi.py   # OAuth e consultas AgroAPI/Embrapa
 ├── core/            # lógica de negócio independente de interface
 │   ├── cotacao.py   # orquestração: primário Scot -> fallback ESALQ, cache
 │   └── conversao.py # conversões puras de unidades (sem rede)
+├── agroapi_tools.py # tools autenticadas registradas condicionalmente
 └── server.py        # tools FastMCP que expõem o core via MCP
 ```
 
@@ -48,6 +50,21 @@ src/mcp_agro_brasil/
 - Unidade canônica intermediária: `kg` (peso) e `m²` (área).
 - Conversão cruzada peso-área é proibida e levanta `ValueError`.
 
+### AgroAPI/Embrapa
+
+- Integração opcional: sem token ou par completo de credenciais, nenhuma tool
+  AgroAPI é registrada e o conjunto padrão permanece inalterado.
+- OAuth 2.0 `client_credentials`: Consumer Key/Secret obtêm um Bearer token em
+  `https://api.cnptia.embrapa.br/token`.
+- O token fica apenas em memória, respeita `expires_in` com margem de segurança
+  e é renovado uma única vez após HTTP 401.
+- As bases são fixas e versionadas: AGROFIT v1, Agritec v2, Bioinsumos v2 e
+  AgroTermos v1. URLs não são controladas por entrada do usuário.
+- As buscas AGROFIT/Bioinsumos removem documentos extensos do resultado resumido;
+  a consulta individual preserva o detalhe oficial.
+- Testes usam mocks e exemplos dos OpenAPIs oficiais. Testes de contrato reais
+  dependem de uma aplicação assinante e não fazem parte da suíte padrão.
+
 ## Extensibilidade
 
 Para adicionar soja/milho/café/leite:
@@ -68,5 +85,7 @@ Para conectar ao AgroVoz:
 | HTTP client | `httpx` | consistência com mcp-fiscal e mcp-juridico |
 | Parsing | `re` (regex) | HTML simples, sem necessidade de BeautifulSoup |
 | Cache | dict em memória | MVP; suficiente para sessão single-process |
+| OAuth AgroAPI | token em memória + renovação em 401 | evita persistir ou registrar segredos |
+| Registro AgroAPI | condicional por ambiente | integração opcional sem afetar tools abertas |
 | Build | hatchling | consistência com família MCP Brasil |
 | Testes | pytest + fixtures HTML | evita dependência de rede nos testes |
