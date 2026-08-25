@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Instalar uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
 
