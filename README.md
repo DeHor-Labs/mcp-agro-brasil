@@ -1,6 +1,6 @@
 # mcp-agro-brasil
 
-MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, calendário de safra (CONAB), previsão do tempo, câmbio PTAX, exportações agro e notícias do setor.
+MCP server de dados do agronegócio brasileiro: cotações de boi gordo, soja, milho e leite, calendário de safra (CONAB), previsão do tempo, câmbio PTAX, exportações agro, notícias do setor e integração opcional com as APIs oficiais AgroAPI/Embrapa.
 
 Parte da família [MCP Brasil](https://github.com/DeHor-Labs) junto com
 [mcp-fiscal-brasil](https://github.com/DeHor-Labs/mcp-fiscal-brasil) e
@@ -29,6 +29,7 @@ do agronegócio brasileiro em tempo quase real:
 - **Notícias** - últimas manchetes do agronegócio via RSS (Canal Rural), com filtro por tema
 - **Calendário de safra** - janelas de plantio e colheita por cultura e região, curado do CONAB
 - **Futuros B3** - informação sobre contratos BGI, CCM, SFI, ICF (fonte paga; alternativas indicadas)
+- **AgroAPI/Embrapa (opcional)** - AGROFIT, ZARC e cultivares Agritec, Bioinsumos e AgroTermos
 - **Conversões** - arroba, saca, hectare, alqueire e outras unidades do agro
 
 Os dados de cotação são obtidos por scraping de páginas públicas com cache local. Clima e câmbio usam APIs JSON abertas e gratuitas.
@@ -89,6 +90,39 @@ Ou adicione ao `.claude/settings.json` do projeto:
 }
 ```
 
+### AgroAPI/Embrapa (opcional)
+
+As APIs AGROFIT v1, Agritec v2, Bioinsumos v2 e AgroTermos v1 exigem cadastro,
+criação de aplicação e assinatura no [portal AgroAPI da Embrapa](https://www.portal.agroapi.cnptia.embrapa.br/).
+Sem credenciais, o servidor inicia normalmente e as tools AgroAPI não são registradas.
+
+Configure o par de credenciais da aplicação:
+
+```json
+{
+  "mcpServers": {
+    "agro-brasil": {
+      "command": "uvx",
+      "args": ["mcp-agro-brasil"],
+      "env": {
+        "AGROAPI_CLIENT_ID": "CONSUMER_KEY_DA_APLICACAO",
+        "AGROAPI_CLIENT_SECRET": "CONSUMER_SECRET_DA_APLICACAO"
+      }
+    }
+  }
+}
+```
+
+Também são aceitos os nomes oficiais `AGROAPI_CONSUMER_KEY` e
+`AGROAPI_CONSUMER_SECRET`. Para desenvolvimento, um token já emitido pode ser
+fornecido em `AGROAPI_TOKEN` ou `AGROAPI_ACCESS_TOKEN`.
+
+Não salve credenciais no repositório. Com `AGROAPI_CLIENT_ID` e
+`AGROAPI_CLIENT_SECRET`, o cliente usa OAuth 2.0 `client_credentials`, mantém o
+token somente em memória e tenta renová-lo uma vez após uma resposta HTTP 401.
+Tokens fornecidos por `AGROAPI_TOKEN` ou `AGROAPI_ACCESS_TOKEN` são estáticos,
+não são renovados automaticamente e devem ser substituídos manualmente.
+
 ---
 
 ## Ferramentas disponíveis
@@ -110,6 +144,25 @@ Ou adicione ao `.claude/settings.json` do projeto:
 | `listar_pracas` | Lista praças disponíveis no provider Scot | - |
 | `listar_produtos` | Lista todos os produtos com cotação disponível | - |
 | `listar_unidades` | Lista unidades suportadas pelo conversor | - |
+
+### Ferramentas AgroAPI opcionais
+
+Estas tools aparecem somente quando a autenticação AgroAPI está configurada:
+
+| Ferramenta | Descrição | Parâmetros principais |
+|------------|-----------|-----------------------|
+| `agrofit_buscar_produtos` | Busca registros de defensivos e produtos fitossanitários | `termo`, `cultura`, `praga`, `ingrediente_ativo`, `categoria`, `produto_biologico`, `pagina` |
+| `agrofit_consultar_produto` | Consulta produto AGROFIT por registro MAPA | `numero_registro` |
+| `agritec_buscar_municipios` | Resolve município para código IBGE | `nome`, `uf` |
+| `agritec_buscar_culturas` | Resolve cultura para ID Agritec | `nome` |
+| `agritec_consultar_zarc` | Consulta o ZARC oficial por município e cultura | `codigo_ibge`, `id_cultura`, `risco` |
+| `agritec_buscar_cultivares` | Busca cultivares por cultura, UF e safra | `id_cultura`, `uf`, `safra`, `regiao`, `grupo`, `cultivar` |
+| `bioinsumos_buscar_produtos` | Busca produtos biológicos ou inoculantes | `tipo`, `termo`, `cultura`, `praga`, `ingrediente_ativo`, `uf`, `especie`, `pagina` |
+| `agrotermos_buscar` | Busca conceitos por fragmento; relações exigem termo exato | `termo`, `incluir_relacoes` |
+
+As respostas de AGROFIT e Bioinsumos são informativas. Elas não constituem
+prescrição agronômica; confirme registro vigente, cultura, alvo, rótulo/bula,
+receituário e orientação de profissional habilitado antes do uso.
 
 ### Exemplos de retorno
 
@@ -174,6 +227,7 @@ RS, SC, PR, SP, MG, GO, BA, RJ, ES e Brasil (média nacional).
 - **Banco Central do Brasil (PTAX)** - câmbio USD/BRL: [olinda.bcb.gov.br](https://olinda.bcb.gov.br/) (API aberta, sem token)
 - **Comex Stat / MDIC** - exportações do agronegócio: [comexstat.mdic.gov.br](https://comexstat.mdic.gov.br/) (API aberta, sem token)
 - **Canal Rural** - notícias do agronegócio: [canalrural.com.br](https://www.canalrural.com.br/) (RSS público)
+- **AgroAPI / Embrapa Agricultura Digital** - AGROFIT, Agritec, Bioinsumos e AgroTermos: [portal.agroapi.cnptia.embrapa.br](https://www.portal.agroapi.cnptia.embrapa.br/)
 
 ---
 
@@ -204,6 +258,7 @@ O scraping respeita as fontes: cache local de 15 minutos, sem sobrecarga de requ
 - [x] Câmbio USD/BRL PTAX via Banco Central do Brasil
 - [x] Exportações do agronegócio via Comex Stat / MDIC (soja, carne bovina, milho)
 - [x] Notícias do agronegócio via RSS (Canal Rural)
+- [x] Integração opcional AgroAPI/Embrapa: AGROFIT, Agritec v2, Bioinsumos v2 e AgroTermos
 
 **Onda 3 - Safra e Mercado Futuro**
 - [x] Calendário de safra via CONAB (soja, milho 1a/2a, feijão, café, sorgo, algodão - 5 regiões)
@@ -211,6 +266,7 @@ O scraping respeita as fontes: cache local de 15 minutos, sem sobrecarga de requ
 
 **Próximos**
 - [ ] Integrar futuros B3 quando fonte gratuita ou open-access estiver disponível
+- [ ] Avaliar ClimAPI, SATVeg e SmartSolos após validação de contratos e planos
 
 ---
 
