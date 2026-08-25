@@ -17,13 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Scan de lockfiles (falha em vulnerabilidade conhecida não listada em osv-scanner.toml)
-        uses: google/osv-scanner-action/osv-scanner-action@v2.5.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          scan-args: |
-            --recursive
-            --format=table
-            ./
+          version: "0.12.3"
+          enable-cache: false
+      - name: Validar lockfile auditável e sincronizado
+        run: uv lock --check
+      - name: Instalar OSV Scanner 2.5.1 com checksum fixo
+        env:
+          OSV_SCANNER_SHA256: f9f25499a2c8cc367b3af45df2ea7eeca7fbccceab9c35079968f4b3652194be
+          OSV_SCANNER_URL: https://github.com/google/osv-scanner/releases/download/v2.5.1/osv-scanner_linux_amd64
+        run: |
+          curl --fail --location --show-error --silent \
+            "${OSV_SCANNER_URL}" \
+            --output "${RUNNER_TEMP}/osv-scanner"
+          echo "${OSV_SCANNER_SHA256}  ${RUNNER_TEMP}/osv-scanner" | sha256sum --check -
+          chmod +x "${RUNNER_TEMP}/osv-scanner"
+      - name: Auditar dependências travadas
+        run: |
+          "${RUNNER_TEMP}/osv-scanner" scan source --lockfile=uv.lock --format=table
