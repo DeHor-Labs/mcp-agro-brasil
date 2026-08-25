@@ -117,9 +117,11 @@ Também são aceitos os nomes oficiais `AGROAPI_CONSUMER_KEY` e
 `AGROAPI_CONSUMER_SECRET`. Para desenvolvimento, um token já emitido pode ser
 fornecido em `AGROAPI_TOKEN` ou `AGROAPI_ACCESS_TOKEN`.
 
-Não salve credenciais no repositório. O cliente usa OAuth 2.0
-`client_credentials`, mantém o token somente em memória e o renova uma vez após
-uma resposta HTTP 401.
+Não salve credenciais no repositório. Com `AGROAPI_CLIENT_ID` e
+`AGROAPI_CLIENT_SECRET`, o cliente usa OAuth 2.0 `client_credentials`, mantém o
+token somente em memória e tenta renová-lo uma vez após uma resposta HTTP 401.
+Tokens fornecidos por `AGROAPI_TOKEN` ou `AGROAPI_ACCESS_TOKEN` são estáticos,
+não são renovados automaticamente e devem ser substituídos manualmente.
 
 ---
 

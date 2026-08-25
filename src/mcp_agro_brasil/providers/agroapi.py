@@ -483,7 +483,7 @@ def buscar_culturas_agritec(
 def consultar_zarc_agritec(
     codigo_ibge: int,
     id_cultura: int,
-    risco: str = "20",
+    risco: str = "todos",
     *,
     client: AgroApiTransport | None = None,
 ) -> dict[str, Any]:

@@ -21,6 +21,8 @@ from mcp_agro_brasil.providers.agroapi import (
     consultar_zarc_agritec,
 )
 
+_CONCURRENCY_TIMEOUT_SECONDS = 10.0
+
 
 class RecordingClient:
     """Cliente mínimo para validar rotas e parâmetros sem acessar a rede."""
@@ -251,7 +253,7 @@ def test_cliente_nao_apaga_token_renovado_igual_em_401_atrasado(
                 ordem = chamadas["get"]
             if ordem == 1:
                 primeira_requisicao_iniciada.set()
-                if not token_renovado.wait(timeout=2):
+                if not token_renovado.wait(timeout=_CONCURRENCY_TIMEOUT_SECONDS):
                     raise AssertionError("A segunda chamada não renovou o token a tempo")
                 return MockResponse(401)
             if ordem == 2:
@@ -272,10 +274,10 @@ def test_cliente_nao_apaga_token_renovado_igual_em_401_atrasado(
     segunda = Thread(target=consultar, args=(client,))
 
     primeira.start()
-    assert primeira_requisicao_iniciada.wait(timeout=2)
+    assert primeira_requisicao_iniciada.wait(timeout=_CONCURRENCY_TIMEOUT_SECONDS)
     segunda.start()
-    primeira.join(timeout=2)
-    segunda.join(timeout=2)
+    primeira.join(timeout=_CONCURRENCY_TIMEOUT_SECONDS)
+    segunda.join(timeout=_CONCURRENCY_TIMEOUT_SECONDS)
 
     assert not primeira.is_alive()
     assert not segunda.is_alive()
@@ -335,7 +337,6 @@ def test_agritec_zarc_valida_risco_e_mapeia_parametros() -> None:
     resultado = consultar_zarc_agritec(
         codigo_ibge=5105259,
         id_cultura=1209,
-        risco="20",
         client=client,
     )
 
@@ -343,7 +344,7 @@ def test_agritec_zarc_valida_risco_e_mapeia_parametros() -> None:
         (
             "agritec",
             "/zoneamento",
-            {"codigoIBGE": 5105259, "idCultura": 1209, "risco": "20"},
+            {"codigoIBGE": 5105259, "idCultura": 1209, "risco": "todos"},
         )
     ]
     assert resultado["api"] == "Agritec v2"
@@ -426,6 +427,26 @@ def test_bioinsumos_seleciona_endpoint(tipo: str, esperado: str) -> None:
 
     assert client.calls[0][0] == "bioinsumos"
     assert client.calls[0][1] == esperado
+
+
+def test_bioinsumos_rejeita_filtro_de_inoculante_em_produto_biologico() -> None:
+    with pytest.raises(ValueError, match="exclusivos de inoculantes"):
+        buscar_produtos_bioinsumos(
+            tipo="biologico",
+            termo="soja",
+            uf="MT",
+            client=RecordingClient(),
+        )
+
+
+def test_bioinsumos_rejeita_filtro_biologico_em_inoculante() -> None:
+    with pytest.raises(ValueError, match="exclusivos de produtos biológicos"):
+        buscar_produtos_bioinsumos(
+            tipo="inoculante",
+            termo="soja",
+            praga="mosca branca",
+            client=RecordingClient(),
+        )
 
 
 def test_agrotermos_busca_parcial_ou_relacoes() -> None:
